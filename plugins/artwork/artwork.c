@@ -59,6 +59,10 @@
 #include "../../strdupa.h"
 #include "wos.h"
 
+#ifndef DISPATCH_QUEUE_CONCURRENT
+#define DISPATCH_QUEUE_CONCURRENT NULL
+#endif
+
 #define ENABLE_MUSICBRAINZ 0
 #define ENABLE_ALBUMART_ORG 0
 
@@ -112,7 +116,7 @@ static char *nocover_path;
 static time_t cache_reset_time;
 static time_t default_reset_time;
 
-#define DEFAULT_FILEMASK "front.png;front.jpg;folder.png;folder.jpg;cover.png;cover.jpg;f.png;f.jpg;*front*.png;*front*.jpg;*cover*.png;*cover*.jpg;*folder*.png;*folder*.jpg;*.png;*.jpg"
+#define DEFAULT_FILEMASK "front.png;front.jpg;front.jpeg;folder.png;folder.jpg;folder.jpeg;cover.png;cover.jpg;cover.jpeg;f.png;f.jpg;f.jpeg;*front*.png;*front*.jpg;*front*.jpeg;*cover*.png;*cover*.jpg;*cover.jpeg;*folder*.png;*folder*.jpg;*folder*.jpeg;*.png;*.jpg;*.jpeg"
 #define DEFAULT_FOLDERS "art;scans;covers;artwork;artworks"
 
 static char *artwork_filemask;
@@ -365,7 +369,7 @@ local_image_file (const char *local_path, const char *uri, DB_vfs_t *vfsplug, dd
         }
         trace ("scanning %s for artwork\n", path);
         for (char *mask = filemask; mask < filemask_end; mask += strlen (mask)+1) {
-            if (mask[0] && !scan_local_path (mask, path, uri, vfsplug, cover)) {
+            if (mask[0] && path && !scan_local_path (mask, path, uri, vfsplug, cover)) {
                 free (filemask);
                 free (folders);
                 free (path);
